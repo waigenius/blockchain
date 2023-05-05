@@ -15,14 +15,17 @@ contract SellAppartments {
 
     uint countAppart = 0;
     mapping (uint => Appartment) public appartments;
+    
     /// Events ///
+    event salesSummary(address client, uint amount, string appartID);
 
     /// Modifiers ///
 
-   
 
     /// Mutable functions ///
+
     function addAppart(string memory _city, uint256 _price) public {
+        
         Appartment memory newAppartment = Appartment({
             id:    countAppart + 1,
             owner: msg.sender,
@@ -32,9 +35,9 @@ contract SellAppartments {
         });
 
         appartments[countAppart] = newAppartment; 
-
         countAppart++;
     }
+
 
     function buyAppartment(uint appartId) public payable {
 
@@ -62,10 +65,8 @@ contract SellAppartments {
         // Update the new owner of appartment
         appartments[appartId].owner = msg.sender;
         appartments[appartId].isSell = true;
-        
-        // Event
 
+        emit salesSummary(msg.sender, _amount, appartments[appartId].city);
     }
-
 
 }

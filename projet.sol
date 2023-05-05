@@ -1,58 +1,71 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract VendeurAppartements {
+contract SellAppartments {
     
-    struct Appartement {
+    /// State variables ///
+    struct Appartment {
+
         uint256 id;
-        string adresse;
-        uint256 prix;
-        
+        address owner;
+        string city;
+        uint256 price;
+        bool isSell;
     }
-    
-    struct Vendeur {
-        address adresseVendeur;
-        Appartement[] appartements;
-    }
-    
-    mapping (address => Vendeur) vendeurs;
-    
-    function ajouterAppartement(string memory _adresse, uint256 _prix) public {
 
-        Appartement memory nouvelAppartement = Appartement({
+    uint countAppart = 0;
+    mapping (uint => Appartment) public appartments;
+    /// Events ///
 
-            id:    vendeurs[msg.sender].appartements.length + 1,
-            adresse: _adresse,
-            prix: _prix
+    /// Modifiers ///
 
+   
+
+    /// Mutable functions ///
+    function addAppart(string memory _city, uint256 _price) public {
+        Appartment memory newAppartment = Appartment({
+            id:    countAppart + 1,
+            owner: msg.sender,
+            city: _city,
+            price: _price,
+            isSell : false
         });
-        vendeurs[msg.sender].appartements.push(nouvelAppartement);
-    }
-    
-    //Liste des appartements du vendeur
-    function getAppartementsDuVendeur() public view returns (Appartement[] memory) {
-        return vendeurs[msg.sender].appartements;
+
+        appartments[countAppart] = newAppartment; 
+
+        countAppart++;
     }
 
-    // Achat d'un appartement :  client 
-    
-    // Liste des appartements vendus pour un vendeur
+    function buyAppartment(uint appartId) public payable {
 
-    
+        // Get the current owner before selling
+        address payable seller =  payable (appartments[appartId].owner);
+
+        // Check if Seller != Client
+        require(seller != msg.sender, "You can't buy your own product");
+
+        // Check if apprtID exist
+        require(appartId <= countAppart, "This appartment is not exist");
+     
+        //Check if appartment is available
+        require(appartments[appartId].isSell == false, "This appartment is already selled");
+
+        // Get price of appartment
+        uint _amount = appartments[appartId].price;
+
+        // Check if the amount of client is enough 
+        require(msg.value >= _amount, "Not much money");
+
+        // Transfer money to Seller
+        seller.transfer(msg.value);
+
+        // Update the new owner of appartment
+        appartments[appartId].owner = msg.sender;
+        appartments[appartId].isSell = true;
+        
+        // Event
+
+    }
+
+
 }
-
-
-
-
-
-
-// Des vendeurs qui mettront leurs biens en vente
-//Ils doivent mettre la description de leur biens.
-
-// Les acheteurs qui selectionne un bien puis l'achète.
-
-// Les biens vont être stockés dans une structure.
-
-// la fonction pour trensférer le bien _to
-
-// la fonction pour spécifier le propriétaire du bien _by.
